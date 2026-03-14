@@ -1,116 +1,181 @@
 import streamlit as st
-import base64
 
-st.set_page_config(page_title="AI Career Assistant", layout="centered")
+st.set_page_config(page_title="AI Career Assistant", page_icon="🚀", layout="wide")
 
-# Convert video to base64
-def video_to_base64(path):
-    with open(path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
-
-video_base64 = video_to_base64("vi.mp4")
-
-# ================= CSS + VIDEO =================
-st.markdown(f"""
+# ---------- CSS ----------
+st.markdown("""
 <style>
 
-/* Background Video */
-#bg-video {{
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -3;
-    pointer-events: none;
-}}
+/* Hide Streamlit UI */
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+[data-testid="stSidebar"] {display:none;}
+[data-testid="collapsedControl"] {display:none;}
 
-/* Dark overlay */
-.overlay {{
-    position: fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background: rgba(0,0,0,0.65);
-    z-index:-2;
-}}
+/* Background */
+.stApp {
+    background: linear-gradient(135deg,#eef2ff,#f8fafc);
+}
 
-/* Transparent Streamlit app */
-.stApp {{
-    background: transparent;
-}}
-
-/* Decorative Title Box */
-.title-box {{
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-    border-radius: 20px;
-    padding: 25px;
-    margin-bottom: 25px;
-    border: 2px solid rgba(255,255,255,0.25);
-    box-shadow: 0 0 25px rgba(255, 0, 128, 0.5);
-    backdrop-filter: blur(12px);
-    text-align: center;
-}}
-
-/* Main Title */
-.title-box h1 {{
-    color: white;
-    font-size: 40px;
-    font-weight: 900;
-}}
+/* Hero title */
+.hero{
+    font-size:60px;
+    font-weight:700;
+}
 
 /* Subtitle */
-.title-box h3 {{
-    color: #ffccff;
-    font-size: 20px;
-}}
+.sub{
+    font-size:20px;
+    color:#555;
+}
 
-/* Center buttons styling */
-.stButton button {{
-    background: linear-gradient(135deg, #ff512f, #dd2476);
-    color: white;
-    border-radius: 14px;
-    padding: 14px;
-    font-size: 18px;
-    font-weight: bold;
-    width: 100%;
-    border: none;
-    box-shadow: 0px 10px 20px rgba(0,0,0,0.4);
-    transition: 0.3s;
-}}
+/* Card */
+.card{
+    padding:25px;
+    border-radius:15px;
+    background:white;
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    text-align:center;
 
-.stButton button:hover {{
-    transform: scale(1.05);
-    background: linear-gradient(135deg, #ffb347, #ffcc33);
-    color: black;
-}}
+    height:200px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.card h3{
+    margin-bottom:10px;
+}
+
+.card p{
+    margin:0;
+}
+
+/* Button */
+.stButton>button{
+    border-radius:10px;
+    width:180px;
+    height:45px;
+    font-size:16px;
+}
 
 </style>
-
-<video id="bg-video" autoplay muted loop>
-<source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
-</video>
-
-<div class="overlay"></div>
 """, unsafe_allow_html=True)
 
-# ================= TITLE BOX =================
-st.markdown("""
-<div class="title-box">
-    <h1>🚀 AI Career Assistant System</h1>
-    <h3>Smart Resume Analyzer & Job Matching Platform</h3>
-</div>
-""", unsafe_allow_html=True)
+# ---------- HERO ----------
+col1, col2 = st.columns([3,2])
 
-# ================= CENTER BUTTONS =================
-# Create 3 columns (left space, center buttons, right space)
-left, center, right = st.columns([4,4,4])
+with col1:
 
-with center:
-    if st.button("\u00A0\u00A0\u00A0\u00A0\u00A0📄 \u00A0\u00A0Resume     \u00A0\u00A0     Analyzer\u00A0\u00A0\u00A0"):
-        st.switch_page("pages/resume_page.py")
+    st.markdown('<div class="hero">🚀 AI Career Assistant</div>', unsafe_allow_html=True)
 
-    if st.button("💼 Job Description Matcher"):
-        st.switch_page("pages/jd_matcher_page.py")
+    st.markdown(
+        '<div class="sub">AI-powered Resume Analysis and Job Matching Platform</div>',
+        unsafe_allow_html=True
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c2:
+        if st.button("🔑 Login"):
+            st.switch_page("pages/login_page.py")
+
+    with c1:
+        if st.button("📝 Sign Up"):
+            st.switch_page("pages/1_signup_page.py")
+
+with col2:
+    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712109.png", width=350)
+
+st.write("")
+st.write("")
+
+
+# ---------- FEATURES ----------
+st.subheader("✨ Powerful Features")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("""
+    <div class="card">
+    <h3>📄 Resume Analyzer</h3>
+    <p>Upload your resume and get instant AI feedback.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="card">
+    <h3>🎯 Job Matching</h3>
+    <p>Find jobs that match your skills and experience.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div class="card">
+    <h3>📊 Skill Gap Analysis</h3>
+    <p>Identify missing skills and improve your profile.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+st.write("")
+st.write("")
+
+# ---------- TRUST SECTION ----------
+st.subheader("🌍 Trusted by Career Seekers")
+
+col1, col2, col3, col4 = st.columns(4)
+
+col1.metric("👥 Users", "5,000+")
+col2.metric("📄 Resumes Analyzed", "12,000+")
+col3.metric("🎯 Job Matches", "3,500+")
+col4.metric("⭐ Satisfaction", "96%")
+
+st.write("")
+st.write("")
+
+
+
+# ---------- TESTIMONIALS ----------
+st.subheader("💬 What Users Say")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("""
+    <div class="card">
+    ⭐⭐⭐⭐⭐  
+    "This platform helped me improve my resume and land interviews."
+    <br><br>
+    <b>- Software Engineer</b>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="card">
+    ⭐⭐⭐⭐⭐  
+    "The skill gap analysis helped me know what to learn next."
+    <br><br>
+    <b>- Data Analyst</b>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+st.write("")
+st.write("")
+
+
+# ---------- FOOTER ----------
+st.markdown(
+"""
+<center>
+Made with ❤️ using AI Career Assistant
+</center>
+""",
+unsafe_allow_html=True
+)
