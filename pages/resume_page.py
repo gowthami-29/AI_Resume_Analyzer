@@ -1,32 +1,89 @@
+
 import streamlit as st
-import base64
 from resume_parser import extract_text_from_pdf
 from ai_analyzer import analyze_resume
 
-# Page config
 st.set_page_config(page_title="AI Resume Analyzer", layout="centered")
 
-# Cache background to prevent reload flicker
-@st.cache_data
-def get_base64_bg(image_path):
-    with open(image_path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
+# ---------- CSS ----------
+st.markdown("""
+<style>
 
-bg_img = get_base64_bg("pages/r2.png")
-# Display title
-st.title("📄 AI Resume Analyzer")
+.title{
+text-align:center;
+font-size:42px;
+font-weight:800;
+margin-bottom:20px;
+background: linear-gradient(90deg,#00c6ff,#0072ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
 
-# File upload
-uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
 
-if uploaded_file:
-    resume_text = extract_text_from_pdf(uploaded_file)
 
-    if st.button("Analyze Resume"):
-        with st.spinner("Analyzing..."):
-            # Run your AI analysis
-            result = analyze_resume(resume_text)
+.center{
+display:flex;
+justify-content:center;
+margin-top:15px;
+}
 
-        st.subheader("📊 Resume Analysis Result")
-        # Display all output via st.write
-        st.write(result)
+.stButton button{
+width:200px;
+height:45px;
+font-size:16px;
+border-radius:10px;
+font-weight:600;
+background:#0072ff;
+color:white;
+}
+
+.stButton button:hover{
+background:#0056cc;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ---------- Title ----------
+st.markdown('<div class="title">📄 AI Resume Analyzer</div>', unsafe_allow_html=True)
+
+# ---------- Check Resume ----------
+if "resume" not in st.session_state:
+    st.warning("⚠ Please upload your resume from the Dashboard first.")
+    st.stop()
+
+# ---------- Resume Loaded Card ----------
+st.markdown('<div class="card">', unsafe_allow_html=True)
+
+st.success("✅ Resume loaded successfully")
+
+st.write("Your uploaded resume is ready for AI analysis.")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------- Analyze Button ----------
+st.markdown('<div class="center">', unsafe_allow_html=True)
+
+analyze = st.button("🚀 Analyze Resume")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------- Analysis ----------
+if analyze:
+
+    resume_file = st.session_state.resume
+
+    with st.spinner("🔎 Extracting resume text..."):
+        resume_text = extract_text_from_pdf(resume_file)
+
+    with st.spinner("🤖 AI analyzing your resume..."):
+        result = analyze_resume(resume_text)
+
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+
+    st.subheader("📊 Resume Analysis Result")
+
+    st.write(result)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+

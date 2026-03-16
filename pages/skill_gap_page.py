@@ -1,23 +1,93 @@
+
 import streamlit as st
 import re
 import spacy
+from resume_parser import extract_text_from_pdf
 
-# Load NLP model
 nlp = spacy.load("en_core_web_sm")
 
-st.set_page_config(page_title="Skill Gap Analyzer", page_icon="🧠")
+st.set_page_config(page_title="Skill Gap Analyzer", page_icon="🧠", layout="centered")
 
-st.title("🧠 Skill Gap Analyzer")
+# ---------- CSS ----------
+st.markdown("""
+<style>
 
-st.write("Compare your resume skills with job description skills")
+.title{
+text-align:center;
+font-size:40px;
+font-weight:800;
+margin-bottom:20px;
+background: linear-gradient(90deg,#4facfe,#00f2fe);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
 
-# Upload resume text
-resume_text = st.text_area("Paste Resume Text")
 
-# Job description
-jd_text = st.text_area("Paste Job Description")
 
-# Simple skill extraction
+.skill{
+display:inline-block;
+background:#e0f2fe;
+padding:6px 12px;
+border-radius:20px;
+margin:5px;
+font-size:14px;
+}
+
+.missing{
+display:inline-block;
+background:#fee2e2;
+padding:6px 12px;
+border-radius:20px;
+margin:5px;
+font-size:14px;
+}
+
+.center{
+display:flex;
+justify-content:center;
+}
+
+.stButton button{
+width:200px;
+height:45px;
+font-size:16px;
+border-radius:10px;
+font-weight:600;
+background:#00a8ff;
+color:white;
+}
+
+.stButton button:hover{
+background:#0078d4;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ---------- Title ----------
+st.markdown('<div class="title">🧠 Skill Gap Analyzer</div>', unsafe_allow_html=True)
+
+# ---------- Check Resume ----------
+if "resume" not in st.session_state:
+    st.warning("⚠ Please upload your resume from the Dashboard first.")
+    st.stop()
+
+st.success("✅ Resume loaded successfully")
+
+# ---------- JD Input ----------
+st.markdown('<div class="card">', unsafe_allow_html=True)
+
+st.subheader("📋 Paste Job Description")
+
+jd_text = st.text_area(
+    "Job Description",
+    height=200,
+    placeholder="Paste the job description here..."
+)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------- Skill Extraction ----------
 def extract_skills(text):
 
     skills_list = [
@@ -37,23 +107,40 @@ def extract_skills(text):
     return list(set(found_skills))
 
 
-if st.button("Analyze Skill Gap"):
+# ---------- Analyze Button ----------
+st.markdown('<div class="center">', unsafe_allow_html=True)
+analyze = st.button("🔍 Analyze Skill Gap")
+st.markdown('</div>', unsafe_allow_html=True)
 
-    if resume_text and jd_text:
+# ---------- Analysis ----------
+if analyze:
 
-        resume_skills = extract_skills(resume_text)
-        jd_skills = extract_skills(jd_text)
+    resume_file = st.session_state.resume
 
-        missing_skills = list(set(jd_skills) - set(resume_skills))
+    with st.spinner("Extracting resume text..."):
+        resume_text = extract_text_from_pdf(resume_file)
 
-        st.subheader("📄 Resume Skills")
-        st.write(resume_skills)
+    resume_skills = extract_skills(resume_text)
+    jd_skills = extract_skills(jd_text)
 
-        st.subheader("💼 Job Required Skills")
-        st.write(jd_skills)
+    missing_skills = list(set(jd_skills) - set(resume_skills))
 
-        st.subheader("❌ Missing Skills")
-        st.write(missing_skills)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
 
+    st.subheader("📄 Resume Skills")
+    for s in resume_skills:
+        st.markdown(f'<span class="skill">{s}</span>', unsafe_allow_html=True)
+
+    st.subheader("💼 Job Required Skills")
+    for s in jd_skills:
+        st.markdown(f'<span class="skill">{s}</span>', unsafe_allow_html=True)
+
+    st.subheader("❌ Missing Skills")
+    if missing_skills:
+        for s in missing_skills:
+            st.markdown(f'<span class="missing">{s}</span>', unsafe_allow_html=True)
     else:
-        st.warning("Please paste both resume and job description")
+        st.success("Your resume already contains all required skills!")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+

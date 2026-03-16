@@ -1,1 +1,9 @@
-[{"username": "jhwq", "email": "wqo9", "password": "kjq"}, {"username": "qwqw", "email": "as@gmail.com", "password": "1234567"}, {"username": "qwqw", "email": "as@gmail.com", "password": "1234567"}, {"username": "qwqw", "email": "as@gmail.com", "password": "1234567"}, {"username": "qwqw", "email": "as@gmail.com", "password": "1234567"}, {"username": "anm", "email": "ass", "password": "aqqqqq2112"}]
+{
+    "users": [
+        {
+            "name": "fu",
+            "email": "fu@gmail.com",
+            "password": "1234567"
+        }
+    ]
+}
