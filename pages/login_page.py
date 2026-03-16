@@ -76,6 +76,7 @@ with center:
                     # set session login
                     st.session_state.logged_in = True
                     st.session_state.user_email = email
+                    st.session_state.user_name = user["name"]
 
                     st.success("Login Successful!")
                     st.switch_page("pages/dashboard_page.py")

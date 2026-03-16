@@ -4,6 +4,11 @@
             "name": "fu",
             "email": "fu@gmail.com",
             "password": "1234567"
+        },
+        {
+            "name": "gow",
+            "email": "gow@gmail.com",
+            "password": "123456"
         }
     ]
 }
