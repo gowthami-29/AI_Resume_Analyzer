@@ -3,3 +3,4 @@ pypdf
 groq
 scikit-learn
 python-dotenv
+gTTS
