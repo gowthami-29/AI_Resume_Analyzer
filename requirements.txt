@@ -5,3 +5,6 @@ scikit-learn
 python-dotenv
 gTTS
 streamlit-mic-recorder
+supabase
+bcrypt
+python-dotenv
