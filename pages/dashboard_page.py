@@ -123,9 +123,9 @@ with col1:
         st.switch_page("pages/resume_page.py")
 
 with col2:
-    st.markdown('<div class="tool-box jd">Resume vs JD</div>',unsafe_allow_html=True)
+    st.markdown('<div class="tool-box jd">Career Report</div>',unsafe_allow_html=True)
     if st.button("Open",key="2"):
-        st.switch_page("pages/jd_matcher_page.py")
+        st.switch_page("pages/career_report_page.py")
 
 with col3:
     st.markdown('<div class="tool-box skill">Skill Gap</div>',unsafe_allow_html=True)
@@ -180,10 +180,7 @@ with col2:
     st.markdown('<div class="tool-box mock">AI Mock Interview</div>',unsafe_allow_html=True)
     if st.button("Open",key="11"):
         st.switch_page("pages/mock_interview_voice.py")
-with col3:
-    st.markdown('<div class="tool-box jd"> Career Report</div>',unsafe_allow_html=True)
-    if st.button("Open",key="report"):
-        st.switch_page("pages/career_report_page.py")
+
 
 # ---------- Logout ----------
 st.write("---")
