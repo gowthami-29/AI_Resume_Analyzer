@@ -104,10 +104,10 @@ col1, col2 = st.columns([3,2])
 
 with col1:
 
-    st.markdown('<div class="hero">🚀 AI Career Assistant</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero">🚀 TalentMatch AI </div>', unsafe_allow_html=True)
 
     st.markdown(
-        '<div class="sub">AI-powered Resume Analysis and Job Matching Platform</div>',
+        '<div class="sub">AI-Powered Resume Screening & Talent Intelligence Platform</div>',
         unsafe_allow_html=True
     )
 
@@ -208,7 +208,7 @@ st.write("")
 st.markdown(
 """
 <div class="footer">
-Made with ❤️ using AI Career Assistant
+Made with ❤️ using TalentMatch AI
 </div>
 """,
 unsafe_allow_html=True
