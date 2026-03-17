@@ -1,7 +1,5 @@
-
 import streamlit as st
-import json
-import os
+from db import login   # 👈 import database function
 
 st.set_page_config(page_title="Login", page_icon="🔑", layout="wide")
 
@@ -45,11 +43,6 @@ opacity:0.9;
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Ensure users file exists ----------
-if not os.path.exists("users.json"):
-    with open("users.json", "w") as f:
-        json.dump({"users": []}, f)
-
 # ---------- Layout ----------
 left, center, right = st.columns([1,2,1])
 
@@ -64,24 +57,18 @@ with center:
 
         if email and password:
 
-            with open("users.json") as f:
-                data = json.load(f)
+            user = login(email, password)   # 👈 check from database
 
-            user_found = False
+            if user:
+                # ✅ store session
+                st.session_state.logged_in = True
+                st.session_state.user = user
+                st.session_state.user_name = user["name"]
 
-            for user in data["users"]:
-                if user["email"] == email and user["password"] == password:
-                    user_found = True
+                st.success("Login Successful!")
+                st.switch_page("pages/dashboard_page.py")
 
-                    # set session login
-                    st.session_state.logged_in = True
-                    st.session_state.user_email = email
-                    st.session_state.user_name = user["name"]
-
-                    st.success("Login Successful!")
-                    st.switch_page("pages/dashboard_page.py")
-                    break
-            if not user_found:
+            else:
                 st.error("Invalid email or password")
 
         else:

@@ -1,9 +1,11 @@
-
 import streamlit as st
 import os
+import re
 from resume_parser import extract_text_from_pdf
 from ai_analyzer import analyze_resume
 from groq import Groq
+from db import save_resume   # 👈 NEW (important)
+
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 st.set_page_config(page_title="AI Resume Analyzer", layout="centered")
@@ -21,8 +23,6 @@ background: linear-gradient(90deg,#00c6ff,#0072ff);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
-
-
 
 .center{
 display:flex;
@@ -47,6 +47,11 @@ background:#0056cc;
 </style>
 """, unsafe_allow_html=True)
 
+# ---------- PROTECT PAGE ----------
+if "user" not in st.session_state:
+    st.warning("⚠ Please login first")
+    st.switch_page("pages/login_page.py")
+
 # ---------- Title ----------
 st.markdown('<div class="title">📄 AI Resume Analyzer</div>', unsafe_allow_html=True)
 
@@ -55,25 +60,24 @@ if "resume" not in st.session_state:
     st.warning("⚠ Please upload your resume from the Dashboard first.")
     st.stop()
 
-# ---------- Resume Loaded Card ----------
-st.markdown('<div class="card">', unsafe_allow_html=True)
-
+# ---------- Resume Loaded ----------
 st.success("✅ Resume loaded successfully")
 
-st.write("Your uploaded resume is ready for AI analysis.")
+# ---------- Buttons ----------
+col1, col2 = st.columns(2)
 
-st.markdown('</div>', unsafe_allow_html=True)
+with col1:
+    analyze = st.button("🚀 Analyze Resume")
 
-# ---------- Analyze Button ----------
-st.markdown('<div class="center">', unsafe_allow_html=True)
+with col2:
+    improve = st.button("✨ Improve Resume")
 
-analyze = st.button("🚀 Analyze Resume")
-
-st.markdown('</div>', unsafe_allow_html=True)
+# ---------- Extract Text ----------
 resume_file = st.session_state.resume
 resume_text = extract_text_from_pdf(resume_file)
-if st.button("Improve Resume"):
-    
+
+# ---------- Improve Resume ----------
+if improve:
 
     prompt = f"""
     Improve the following resume content and make it professional.
@@ -84,30 +88,32 @@ if st.button("Improve Resume"):
 
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
-        messages=[{"role":"user","content":prompt}]
+        messages=[{"role": "user", "content": prompt}]
     )
 
     improved_resume = response.choices[0].message.content
 
-    st.subheader("Improved Resume")
+    st.subheader("✨ Improved Resume")
     st.write(improved_resume)
 
-# ---------- Analysis ----------
+# ---------- Analyze Resume ----------
 if analyze:
-
-    resume_file = st.session_state.resume
-
-    with st.spinner("🔎 Extracting resume text..."):
-        resume_text = extract_text_from_pdf(resume_file)
 
     with st.spinner("🤖 AI analyzing your resume..."):
         result = analyze_resume(resume_text)
 
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-
     st.subheader("📊 Resume Analysis Result")
-
     st.write(result)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    # ---------- Extract Score (if exists) ----------
+    match = re.search(r"\d+", result)
+    score = int(match.group()) if match else 0
 
+    # ---------- SAVE TO DATABASE ----------
+    save_resume(
+        st.session_state.user["id"],
+        resume_text[:100],
+        score
+    )
+
+    

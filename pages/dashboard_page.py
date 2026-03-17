@@ -1,12 +1,11 @@
-
 import streamlit as st
 
-# Protect page
-if "logged_in" not in st.session_state:
+# ---------- PROTECT PAGE ----------
+if "user" not in st.session_state:
     st.warning("Please login first")
     st.switch_page("pages/login_page.py")
 
-st.set_page_config(page_title="AI Career Assistant", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="AI Resume Assistant", page_icon="🚀", layout="wide")
 
 # ---------- CSS ----------
 st.markdown("""
@@ -27,8 +26,6 @@ text-align:center;
 color:gray;
 margin-bottom:40px;
 }
-
-
 
 .tool-box{
 height:150px;
@@ -61,12 +58,6 @@ box-shadow:0px 10px 20px rgba(0,0,0,0.2);
 .roadmap{background:linear-gradient(135deg,#f6d365,#fda085);}
 .mock{background:linear-gradient(135deg,#ff7eb3,#ff758c);}
 
-.button-center{
-display:flex;
-justify-content:center;
-margin-bottom:30px;
-}
-
 .stButton button{
 width:140px;
 height:38px;
@@ -83,16 +74,17 @@ background:#0072ff;
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Header ----------
-st.markdown('<div class="header">🚀 AI Career Assistant</div>', unsafe_allow_html=True)
+# ---------- HEADER ----------
+st.markdown('<div class="header">🚀 AI Resume Assistant</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub">Your AI Powered Career Platform</div>', unsafe_allow_html=True)
 
-# Welcome
-st.write(f"### Welcome 👋 {st.session_state.user_email}")
+# ---------- USER INFO ----------
+user = st.session_state.user
 
-# ---------- Resume Upload ----------
-st.markdown('<div class="resume-card">', unsafe_allow_html=True)
+st.write(f"### Welcome 👋 {user['name']}")
+st.caption(user["email"])
 
+# ---------- RESUME UPLOAD ----------
 st.write("### 📄 Upload Resume (One time upload for all tools)")
 
 col1, col2 = st.columns([3,1])
@@ -110,11 +102,9 @@ with col2:
     else:
         st.warning("No Resume")
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 st.subheader("🧠 AI Career Tools")
 
-# ---------- Row 1 ----------
+# ---------- ROW 1 ----------
 col1,col2,col3 = st.columns(3)
 
 with col1:
@@ -132,7 +122,7 @@ with col3:
     if st.button("Open",key="3"):
         st.switch_page("pages/skill_gap_page.py")
 
-# ---------- Row 2 ----------
+# ---------- ROW 2 ----------
 col1,col2,col3 = st.columns(3)
 
 with col1:
@@ -150,7 +140,7 @@ with col3:
     if st.button("Open",key="6"):
         st.switch_page("pages/ats_checker_page.py")
 
-# ---------- Row 3 ----------
+# ---------- ROW 3 ----------
 col1,col2,col3 = st.columns(3)
 
 with col1:
@@ -168,7 +158,7 @@ with col3:
     if st.button("Open",key="9"):
         st.switch_page("pages/job_recommendation_page.py")
 
-# ---------- Row 4 ----------
+# ---------- ROW 4 ----------
 col1,col2,col3 = st.columns(3)
 
 with col1:
@@ -181,8 +171,7 @@ with col2:
     if st.button("Open",key="11"):
         st.switch_page("pages/mock_interview_voice.py")
 
-
-# ---------- Logout ----------
+# ---------- LOGOUT ----------
 st.write("---")
 
 if st.button("🔓 Logout"):

@@ -1,7 +1,5 @@
-
 import streamlit as st
-import json
-import os
+from db import signup   # 👈 import database function
 
 st.set_page_config(page_title="Create Account", page_icon="📝", layout="wide")
 
@@ -52,11 +50,6 @@ opacity: 0.9;
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Users File ----------
-if not os.path.exists("users.json"):
-    with open("users.json", "w") as f:
-        json.dump({"users": []}, f)
-
 # ---------- Layout ----------
 col1, col2, col3 = st.columns([1,2,1])
 
@@ -72,27 +65,13 @@ with col2:
 
         if name and email and password:
 
-            with open("users.json") as f:
-                data = json.load(f)
+            try:
+                signup(name, email, password)   # 👈 save to database
+                st.success("Account created successfully!")
+                st.switch_page("pages/login_page.py")
 
-            # check if user already exists
-            for user in data["users"]:
-                if user["email"] == email:
-                    st.error("User already exists. Please login.")
-                    st.stop()
-
-            # add new user
-            data["users"].append({
-                "name": name,
-                "email": email,
-                "password": password
-            })
-
-            with open("users.json", "w") as f:
-                json.dump(data, f, indent=4)
-
-            st.success("Account created successfully!")
-            st.switch_page("pages/login_page.py")
+            except Exception as e:
+                st.error("User already exists or something went wrong")
 
         else:
             st.warning("Fill all fields")
@@ -101,4 +80,3 @@ with col2:
 
     if st.button("⬅ Back"):
         st.switch_page("app.py")
-
