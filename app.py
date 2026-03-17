@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="AI Career Assistant", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="TalentMatch AI", page_icon="🚀", layout="wide")
 
 # ---------- CSS ----------
 st.markdown("""
