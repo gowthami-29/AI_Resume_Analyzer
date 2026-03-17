@@ -1,10 +1,6 @@
-
 import streamlit as st
 import re
-import spacy
 from resume_parser import extract_text_from_pdf
-
-nlp = spacy.load("en_core_web_sm")
 
 st.set_page_config(page_title="Skill Gap Analyzer", page_icon="🧠", layout="centered")
 
@@ -21,8 +17,6 @@ background: linear-gradient(90deg,#4facfe,#00f2fe);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
-
-
 
 .skill{
 display:inline-block;
@@ -75,8 +69,6 @@ if "resume" not in st.session_state:
 st.success("✅ Resume loaded successfully")
 
 # ---------- JD Input ----------
-st.markdown('<div class="card">', unsafe_allow_html=True)
-
 st.subheader("📋 Paste Job Description")
 
 jd_text = st.text_area(
@@ -84,8 +76,6 @@ jd_text = st.text_area(
     height=200,
     placeholder="Paste the job description here..."
 )
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------- Skill Extraction ----------
 def extract_skills(text):
@@ -101,11 +91,11 @@ def extract_skills(text):
     found_skills = []
 
     for skill in skills_list:
-        if skill in text:
+        # Exact match using regex (avoids java inside javascript issue)
+        if re.search(rf"\b{re.escape(skill)}\b", text):
             found_skills.append(skill)
 
     return list(set(found_skills))
-
 
 # ---------- Analyze Button ----------
 st.markdown('<div class="center">', unsafe_allow_html=True)
@@ -125,22 +115,30 @@ if analyze:
 
     missing_skills = list(set(jd_skills) - set(resume_skills))
 
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-
+    # ---------- Results ----------
     st.subheader("📄 Resume Skills")
-    for s in resume_skills:
-        st.markdown(f'<span class="skill">{s}</span>', unsafe_allow_html=True)
+    if resume_skills:
+        for s in resume_skills:
+            st.markdown(f'<span class="skill">{s}</span>', unsafe_allow_html=True)
+    else:
+        st.info("No skills detected in resume")
 
     st.subheader("💼 Job Required Skills")
-    for s in jd_skills:
-        st.markdown(f'<span class="skill">{s}</span>', unsafe_allow_html=True)
+    if jd_skills:
+        for s in jd_skills:
+            st.markdown(f'<span class="skill">{s}</span>', unsafe_allow_html=True)
+    else:
+        st.info("No skills detected in job description")
 
     st.subheader("❌ Missing Skills")
     if missing_skills:
         for s in missing_skills:
             st.markdown(f'<span class="missing">{s}</span>', unsafe_allow_html=True)
     else:
-        st.success("Your resume already contains all required skills!")
+        st.success("🎉 Your resume already contains all required skills!")
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
+    # ---------- Match Score ----------
+    if jd_skills:
+        match_percent = int((len(set(resume_skills) & set(jd_skills)) / len(jd_skills)) * 100)
+        st.progress(match_percent / 100)
+        st.success(f"🎯 Match Score: {match_percent}%")
