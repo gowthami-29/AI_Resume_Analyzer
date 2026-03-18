@@ -170,6 +170,10 @@ with col2:
     st.markdown('<div class="tool-box mock">AI Mock Interview</div>',unsafe_allow_html=True)
     if st.button("Open",key="11"):
         st.switch_page("pages/mock_interview_voice.py")
+with col3:
+    st.markdown('<div class="tool-box cover">Resume Builder</div>', unsafe_allow_html=True)
+    if st.button("Open", key="12"):
+        st.switch_page("pages/resume_builder.py")
 
 # ---------- LOGOUT ----------
 st.write("---")

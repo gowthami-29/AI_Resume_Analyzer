@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="TalentMatch AI", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="AI Career Assistant", page_icon="🚀", layout="wide")
 
 # ---------- CSS ----------
 st.markdown("""
@@ -104,7 +104,7 @@ col1, col2 = st.columns([3,2])
 
 with col1:
 
-    st.markdown('<div class="hero">🚀 TalentMatch AI </div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero">🚀 AI Career Assistant </div>', unsafe_allow_html=True)
 
     st.markdown(
         '<div class="sub">AI-Powered Resume Screening & Talent Intelligence Platform</div>',
