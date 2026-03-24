@@ -1,9 +1,12 @@
 import streamlit as st
+from db import supabase
 
-# ---------- PROTECT PAGE ----------
+# ---------- PROTECT ----------
 if "user" not in st.session_state:
     st.warning("Please login first")
     st.switch_page("pages/login_page.py")
+
+user = st.session_state.user
 
 st.set_page_config(page_title="AI Resume Assistant", page_icon="🚀", layout="wide")
 
@@ -11,42 +14,39 @@ st.set_page_config(page_title="AI Resume Assistant", page_icon="🚀", layout="w
 st.markdown("""
 <style>
 
+/* HEADER */
 .header{
 text-align:center;
 font-size:50px;
 font-weight:800;
-margin-bottom:10px;
-background: linear-gradient(90deg,#00c6ff,#0072ff);
+background: linear-gradient(90deg,#4f46e5,#06b6d4);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
 
 .sub{
 text-align:center;
-color:gray;
-margin-bottom:40px;
+color:#666;
+margin-bottom:30px;
 }
 
-.tool-box{
-height:150px;
-border-radius:18px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-font-size:20px;
-font-weight:600;
+/* CARD CONTAINER */
+.tool-container{
+padding:25px;
+border-radius:20px;
 color:white;
-margin-bottom:10px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.15);
 transition:0.3s;
+margin-bottom:15px;
 }
 
-.tool-box:hover{
-transform:translateY(-5px);
-box-shadow:0px 10px 20px rgba(0,0,0,0.2);
+.tool-container:hover{
+transform:translateY(-8px);
+box-shadow:0 20px 40px rgba(0,0,0,0.25);
 }
 
+/* COLORS */
 .resume{background:linear-gradient(135deg,#667eea,#764ba2);}
 .jd{background:linear-gradient(135deg,#f093fb,#f5576c);}
 .skill{background:linear-gradient(135deg,#4facfe,#00f2fe);}
@@ -58,13 +58,16 @@ box-shadow:0px 10px 20px rgba(0,0,0,0.2);
 .roadmap{background:linear-gradient(135deg,#f6d365,#fda085);}
 .mock{background:linear-gradient(135deg,#ff7eb3,#ff758c);}
 
+/* BUTTON */
 .stButton button{
-width:140px;
+width:120px;
 height:38px;
 border-radius:10px;
 background:#111;
 color:white;
 font-weight:600;
+display:block;
+margin:12px auto;
 }
 
 .stButton button:hover{
@@ -78,106 +81,90 @@ background:#0072ff;
 st.markdown('<div class="header">🚀 AI Resume Assistant</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub">Your AI Powered Career Platform</div>', unsafe_allow_html=True)
 
-# ---------- USER INFO ----------
-user = st.session_state.user
-
 st.write(f"### Welcome 👋 {user['name']}")
-st.caption(user["email"])
 
-# ---------- RESUME UPLOAD ----------
-st.write("### 📄 Upload Resume (One time upload for all tools)")
+# ---------- UPLOAD ----------
+st.subheader("📄 Upload Resume")
 
 col1, col2 = st.columns([3,1])
 
 with col1:
     file = st.file_uploader("Upload Resume", type=["pdf"])
-
     if file:
         st.session_state.resume = file
-        st.success("Resume uploaded successfully!")
+        st.success("Resume uploaded!")
 
 with col2:
     if "resume" in st.session_state:
-        st.success("Resume Stored")
+        st.success("Stored")
     else:
         st.warning("No Resume")
 
-st.subheader("🧠 AI Career Tools")
-
-# ---------- ROW 1 ----------
-col1,col2,col3 = st.columns(3)
-
-with col1:
-    st.markdown('<div class="tool-box resume">Resume Analyzer</div>',unsafe_allow_html=True)
-    if st.button("Open",key="1"):
-        st.switch_page("pages/resume_page.py")
-
-with col2:
-    st.markdown('<div class="tool-box jd">Career Report</div>',unsafe_allow_html=True)
-    if st.button("Open",key="2"):
-        st.switch_page("pages/career_report_page.py")
-
-with col3:
-    st.markdown('<div class="tool-box skill">Skill Gap</div>',unsafe_allow_html=True)
-    if st.button("Open",key="3"):
-        st.switch_page("pages/skill_gap_page.py")
-
-# ---------- ROW 2 ----------
-col1,col2,col3 = st.columns(3)
-
-with col1:
-    st.markdown('<div class="tool-box interview">Interview Questions</div>',unsafe_allow_html=True)
-    if st.button("Open",key="4"):
-        st.switch_page("pages/interview_questions_page.py")
-
-with col2:
-    st.markdown('<div class="tool-box score">Resume Score</div>',unsafe_allow_html=True)
-    if st.button("Open",key="5"):
-        st.switch_page("pages/resume_score_page.py")
-
-with col3:
-    st.markdown('<div class="tool-box ats">ATS Checker</div>',unsafe_allow_html=True)
-    if st.button("Open",key="6"):
-        st.switch_page("pages/ats_checker_page.py")
-
-# ---------- ROW 3 ----------
-col1,col2,col3 = st.columns(3)
-
-with col1:
-    st.markdown('<div class="tool-box chatbot">Career Chatbot</div>',unsafe_allow_html=True)
-    if st.button("Open",key="7"):
-        st.switch_page("pages/carreer_chatbot_page.py")
-
-with col2:
-    st.markdown('<div class="tool-box cover">Cover Letter</div>',unsafe_allow_html=True)
-    if st.button("Open",key="8"):
-        st.switch_page("pages/cover_letter_page.py")
-
-with col3:
-    st.markdown('<div class="tool-box roadmap">Job Recommendation</div>',unsafe_allow_html=True)
-    if st.button("Open",key="9"):
-        st.switch_page("pages/job_recommendation_page.py")
-
-# ---------- ROW 4 ----------
-col1,col2,col3 = st.columns(3)
-
-with col1:
-    st.markdown('<div class="tool-box roadmap">Learning Roadmap</div>',unsafe_allow_html=True)
-    if st.button("Open",key="10"):
-        st.switch_page("pages/learning_roadmap_page.py")
-
-with col2:
-    st.markdown('<div class="tool-box mock">AI Mock Interview</div>',unsafe_allow_html=True)
-    if st.button("Open",key="11"):
-        st.switch_page("pages/mock_interview_voice.py")
-with col3:
-    st.markdown('<div class="tool-box cover">Resume Builder</div>', unsafe_allow_html=True)
-    if st.button("Open", key="12"):
-        st.switch_page("pages/resume_builder.py")
-
-# ---------- LOGOUT ----------
 st.write("---")
 
+# ---------- TOOL FUNCTION ----------
+def tool_card(title, css_class, page, key):
+    st.markdown(f"""
+    <div class="tool-container {css_class}">
+        <h3>{title}</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns([1,2,1])
+    with c2:
+        if st.button("Open", key=key):
+            st.switch_page(page)
+
+# ---------- TOOLS ----------
+st.subheader("🧠 AI Career Tools")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    tool_card("📄 Resume Analyzer", "resume", "pages/resume_page.py", "1")
+
+with col2:
+    tool_card("📊 Career Report", "jd", "pages/career_report_page.py", "2")
+
+with col3:
+    tool_card("🧠 Skill Gap", "skill", "pages/skill_gap_page.py", "3")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    tool_card("🎤 Interview Questions", "interview", "pages/interview_questions_page.py", "4")
+
+with col2:
+    tool_card("📈 Resume Score", "score", "pages/resume_score_page.py", "5")
+
+with col3:
+    tool_card("📄 ATS Checker", "ats", "pages/ats_checker_page.py", "6")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    tool_card("🤖 Career Chatbot", "chatbot", "pages/carreer_chatbot_page.py", "7")
+
+with col2:
+    tool_card("✉ Cover Letter", "cover", "pages/cover_letter_page.py", "8")
+
+with col3:
+    tool_card("💼 Job Recommendation", "roadmap", "pages/job_recommendation_page.py", "9")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    tool_card("📚 Learning Roadmap", "roadmap", "pages/learning_roadmap_page.py", "10")
+
+with col2:
+    tool_card("🎯 AI Mock Interview", "mock", "pages/mock_interview_voice.py", "11")
+
+with col3:
+    tool_card("🧾 Resume Builder", "cover", "pages/resume_builder.py", "12")
+
+st.write("---")
+
+# ---------- LOGOUT ----------
 if st.button("🔓 Logout"):
     st.session_state.clear()
     st.switch_page("app.py")

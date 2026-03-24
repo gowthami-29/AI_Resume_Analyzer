@@ -1,55 +1,117 @@
-
 import streamlit as st
-import os
-from dotenv import load_dotenv
-from groq import Groq
-from resume_parser import extract_text_from_pdf
+from db import supabase
+import pandas as pd
 
-load_dotenv()
+# ---------- PROTECT ----------
+if "user" not in st.session_state:
+    st.warning("Please login first")
+    st.switch_page("pages/login_page.py")
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+user = st.session_state.user
 
-st.set_page_config(page_title="AI Career Report", page_icon="📊")
+st.set_page_config(page_title="Dashboard", layout="wide")
 
-st.title("📊 AI Career Report")
+# ---------- CSS ----------
+st.markdown("""
+<style>
 
-st.write("Get a complete career analysis based on your resume.")
+.header{
+font-size:42px;
+font-weight:800;
+margin-bottom:5px;
+background: linear-gradient(90deg,#4f46e5,#06b6d4);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
 
-# check resume
-if "resume" not in st.session_state:
-    st.warning("Please upload resume from dashboard first.")
-    st.stop()
+.sub{
+color:gray;
+margin-bottom:20px;
+}
 
-resume_file = st.session_state.resume
-resume_text = extract_text_from_pdf(resume_file)
+/* STAT CARDS */
+.card{
+padding:20px;
+border-radius:16px;
+color:white;
+font-weight:600;
+box-shadow:0 8px 25px rgba(0,0,0,0.1);
+}
 
-if st.button("Generate Career Report"):
+.c1{background:linear-gradient(135deg,#6366f1,#06b6d4);}
+.c2{background:linear-gradient(135deg,#f59e0b,#ef4444);}
+.c3{background:linear-gradient(135deg,#10b981,#3b82f6);}
 
-    prompt = f"""
-    Analyze the following resume and generate a career report.
+/* TOOL CARDS */
+.tool{
+padding:30px;
+border-radius:16px;
+color:white;
+text-align:center;
+font-weight:600;
+margin-bottom:10px;
+transition:0.3s;
+}
 
-    Resume:
-    {resume_text}
+.tool:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
 
-    Provide:
+</style>
+""", unsafe_allow_html=True)
 
-    1. Resume Score out of 100
-    2. Best Career Roles (3)
-    3. Missing Skills
-    4. Resume Improvement Suggestions
-    5. Learning Roadmap
-    """
+# ---------- HEADER ----------
+st.markdown(f'<div class="header">👋 Welcome {user["name"]}</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub">Your AI Career Dashboard</div>', unsafe_allow_html=True)
 
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[
-            {"role":"user","content":prompt}
-        ]
-    )
+# ---------- FETCH DATA ----------
+res = supabase.table("resumes") \
+    .select("score") \
+    .eq("user_id", user["id"]) \
+    .execute()
 
-    report = response.choices[0].message.content
+scores = [r["score"] for r in res.data]
 
-    st.subheader("AI Career Report")
+# ---------- STATS ----------
+if scores:
 
-    st.write(report)
+    col1, col2, col3 = st.columns(3)
+
+    col1.markdown(f"""
+    <div class="card c1">
+    📄 Total Resumes<br><br>
+    <h2>{len(scores)}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col2.markdown(f"""
+    <div class="card c2">
+    🏆 Best Score<br><br>
+    <h2>{max(scores)}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col3.markdown(f"""
+    <div class="card c3">
+    📊 Average Score<br><br>
+    <h2>{int(sum(scores)/len(scores))}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.write("")
+
+    # ---------- GRAPH ----------
+    df = pd.DataFrame({
+        "Attempt": range(1, len(scores)+1),
+        "Score": scores
+    })
+
+    st.subheader("📈 Resume Performance")
+    st.line_chart(df.set_index("Attempt"))
+
+else:
+    st.info("No resume data yet. Analyze a resume to see insights.")
+
+st.write("---")
 

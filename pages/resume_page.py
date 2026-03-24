@@ -4,7 +4,7 @@ import re
 from resume_parser import extract_text_from_pdf
 from ai_analyzer import analyze_resume
 from groq import Groq
-from db import save_resume   # 👈 NEW (important)
+from db import save_resume
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
@@ -52,18 +52,17 @@ if "user" not in st.session_state:
     st.warning("⚠ Please login first")
     st.switch_page("pages/login_page.py")
 
-# ---------- Title ----------
+# ---------- TITLE ----------
 st.markdown('<div class="title">📄 AI Resume Analyzer</div>', unsafe_allow_html=True)
 
-# ---------- Check Resume ----------
+# ---------- CHECK RESUME ----------
 if "resume" not in st.session_state:
     st.warning("⚠ Please upload your resume from the Dashboard first.")
     st.stop()
 
-# ---------- Resume Loaded ----------
 st.success("✅ Resume loaded successfully")
 
-# ---------- Buttons ----------
+# ---------- BUTTONS ----------
 col1, col2 = st.columns(2)
 
 with col1:
@@ -72,11 +71,11 @@ with col1:
 with col2:
     improve = st.button("✨ Improve Resume")
 
-# ---------- Extract Text ----------
+# ---------- EXTRACT TEXT ----------
 resume_file = st.session_state.resume
 resume_text = extract_text_from_pdf(resume_file)
 
-# ---------- Improve Resume ----------
+# ---------- IMPROVE ----------
 if improve:
 
     prompt = f"""
@@ -96,7 +95,7 @@ if improve:
     st.subheader("✨ Improved Resume")
     st.write(improved_resume)
 
-# ---------- Analyze Resume ----------
+# ---------- ANALYZE ----------
 if analyze:
 
     with st.spinner("🤖 AI analyzing your resume..."):
@@ -105,15 +104,24 @@ if analyze:
     st.subheader("📊 Resume Analysis Result")
     st.write(result)
 
-    # ---------- Extract Score (if exists) ----------
-    match = re.search(r"\d+", result)
-    score = int(match.group()) if match else 0
+    # ---------- SCORE EXTRACTION (SAFE) ----------
+    match = re.search(r"Score:\s*(\d+)", result)
 
-    # ---------- SAVE TO DATABASE ----------
+    if match:
+        score = int(match.group(1))
+    else:
+        # fallback (if AI format is wrong)
+        numbers = re.findall(r"\d+", result)
+        score = int(numbers[-1]) if numbers else 0
+
+    # ---------- SAVE ----------
     save_resume(
         st.session_state.user["id"],
         resume_text[:100],
         score
     )
 
-    
+    # ---------- DEBUG ----------
+    st.write("Extracted score:", score)
+
+    st.success(f"✅ Saved! Score: {score}")
