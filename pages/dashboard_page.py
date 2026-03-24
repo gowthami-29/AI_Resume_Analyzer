@@ -32,6 +32,12 @@ margin-bottom:30px;
 
 /* CARD CONTAINER */
 .tool-container{
+height:180px;              /* 👈 FIXED HEIGHT */
+display:flex;
+flex-direction:column;
+justify-content:center;    /* vertical center */
+align-items:center;        /* horizontal center */
+
 padding:25px;
 border-radius:20px;
 color:white;
@@ -120,10 +126,10 @@ st.subheader("🧠 AI Career Tools")
 
 col1, col2, col3 = st.columns(3)
 
-with col1:
+with col2:
     tool_card("📄 Resume Analyzer", "resume", "pages/resume_page.py", "1")
 
-with col2:
+with col1:
     tool_card("📊 Career Report", "jd", "pages/career_report_page.py", "2")
 
 with col3:
