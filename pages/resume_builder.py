@@ -1,117 +1,166 @@
 import streamlit as st
-from groq import Groq
-import os
+import io
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
-st.set_page_config(page_title="Resume Builder", layout="wide")
+st.set_page_config(page_title="Canva Resume Builder", layout="wide")
 
 # ---------- CSS ----------
 st.markdown("""
 <style>
-
 .main-title{
 text-align:center;
 font-size:45px;
 font-weight:800;
-margin-bottom:10px;
 background: linear-gradient(90deg,#4f46e5,#06b6d4);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
 
-.sub{
-text-align:center;
-color:gray;
-margin-bottom:40px;
+.preview-box{
+padding:20px;
+border-radius:15px;
+background:white;
+box-shadow:0 10px 25px rgba(0,0,0,0.1);
 }
-
-
-
-.stButton>button{
-width:100%;
-height:45px;
-border-radius:12px;
-font-size:16px;
-font-weight:600;
-background:linear-gradient(90deg,#4f46e5,#06b6d4);
-color:white;
-border:none;
-}
-
-.stButton>button:hover{
-transform:scale(1.03);
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 # ---------- HEADER ----------
-st.markdown('<div class="main-title">🧠 ResumeCraft AI</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub">Build professional resumes in seconds</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🎨 Canva Resume Builder</div>', unsafe_allow_html=True)
+
+# ---------- TEMPLATE ----------
+template = st.radio(
+    "Choose Template",
+    ["Modern", "Professional", "Minimal"],
+    horizontal=True
+)
 
 # ---------- LAYOUT ----------
 col1, col2 = st.columns([1,1])
 
-# ---------- LEFT SIDE (INPUT) ----------
+# ---------- INPUT ----------
 with col1:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("✏️ Edit Your Resume")
 
-    st.subheader("📥 Enter Your Details")
+    name = st.text_input("Full Name", "Your Name")
+    email = st.text_input("Email", "your@email.com")
+    phone = st.text_input("Phone", "1234567890")
 
-    name = st.text_input("Full Name")
-    email = st.text_input("Email")
-    phone = st.text_input("Phone Number")
+    skills = st.text_area("Skills", "Python, SQL, Machine Learning")
+    education = st.text_area("Education", "B.Tech in Computer Science")
+    experience = st.text_area("Experience", "Fresher / Internship details")
+    projects = st.text_area("Projects", "AI Resume Analyzer Project")
 
-    skills = st.text_area("Skills (comma separated)")
-    education = st.text_area("Education")
-    experience = st.text_area("Experience")
-    projects = st.text_area("Projects")
-
-    generate = st.button("🚀 Generate Resume")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------- RIGHT SIDE (OUTPUT) ----------
+# ---------- PREVIEW ----------
 with col2:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("📄 Live Preview")
 
-    st.subheader("📄 Resume Preview")
+    if template == "Modern":
+        st.markdown(f"""
+        <div class="preview-box">
+        <h2 style="color:#4f46e5;">{name}</h2>
+        <p>{email} | {phone}</p>
+        <hr>
 
-    if generate and name and skills:
+        <h4>Skills</h4>
+        <p>{skills}</p>
 
-        with st.spinner("Generating..."):
+        <h4>Education</h4>
+        <p>{education}</p>
 
-            prompt = f"""
-            Create a professional resume.
+        <h4>Experience</h4>
+        <p>{experience}</p>
 
-            Name: {name}
-            Email: {email}
-            Phone: {phone}
-            Skills: {skills}
-            Education: {education}
-            Experience: {experience}
-            Projects: {projects}
+        <h4>Projects</h4>
+        <p>{projects}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-            Format with proper sections.
-            """
+    elif template == "Professional":
+        st.markdown(f"""
+        <div class="preview-box">
+        <h2>{name}</h2>
+        <p><b>Email:</b> {email} | <b>Phone:</b> {phone}</p>
+        <hr>
 
-            response = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[{"role":"user","content":prompt}]
-            )
+        <h4>Skills</h4>
+        <p>{skills}</p>
 
-            resume = response.choices[0].message.content
+        <h4>Education</h4>
+        <p>{education}</p>
 
-            st.write(resume)
+        <h4>Experience</h4>
+        <p>{experience}</p>
 
-            st.download_button(
-                "📥 Download Resume",
-                resume,
-                file_name="resume.txt"
-            )
+        <h4>Projects</h4>
+        <p>{projects}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    else:
-        st.info("Fill details and click Generate")
+    elif template == "Minimal":
+        st.markdown(f"""
+        <div class="preview-box">
+        <h3>{name}</h3>
+        <p>{email} | {phone}</p>
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        <p><b>Skills:</b> {skills}</p>
+        <p><b>Education:</b> {education}</p>
+        <p><b>Experience:</b> {experience}</p>
+        <p><b>Projects:</b> {projects}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ---------- PDF FUNCTION ----------
+def create_pdf(data):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer)
+    styles = getSampleStyleSheet()
+
+    content = []
+
+    content.append(Paragraph(f"<b>{data['name']}</b>", styles["Title"]))
+    content.append(Spacer(1, 10))
+    content.append(Paragraph(f"{data['email']} | {data['phone']}", styles["Normal"]))
+    content.append(Spacer(1, 10))
+
+    content.append(Paragraph("<b>Skills</b>", styles["Heading2"]))
+    content.append(Paragraph(data["skills"], styles["Normal"]))
+    content.append(Spacer(1, 10))
+
+    content.append(Paragraph("<b>Education</b>", styles["Heading2"]))
+    content.append(Paragraph(data["education"], styles["Normal"]))
+    content.append(Spacer(1, 10))
+
+    content.append(Paragraph("<b>Experience</b>", styles["Heading2"]))
+    content.append(Paragraph(data["experience"], styles["Normal"]))
+    content.append(Spacer(1, 10))
+
+    content.append(Paragraph("<b>Projects</b>", styles["Heading2"]))
+    content.append(Paragraph(data["projects"], styles["Normal"]))
+
+    doc.build(content)
+    buffer.seek(0)
+    return buffer
+
+# ---------- DOWNLOAD ----------
+st.write("---")
+
+data = {
+    "name": name,
+    "email": email,
+    "phone": phone,
+    "skills": skills,
+    "education": education,
+    "experience": experience,
+    "projects": projects
+}
+
+pdf_file = create_pdf(data)
+
+st.download_button(
+    "📥 Download Resume (PDF)",
+    data=pdf_file,
+    file_name="resume.pdf",
+    mime="application/pdf"
+)
