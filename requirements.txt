@@ -8,3 +8,4 @@ streamlit-mic-recorder
 supabase
 bcrypt
 python-dotenv
+reportlab
